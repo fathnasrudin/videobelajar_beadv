@@ -106,4 +106,32 @@ router.patch("/:id", async (req: Request, res: Response) => {
   });
 });
 
+router.delete("/:id", async (req: Request, res: Response) => {
+  const courseId = req.params.id;
+
+  const course = courses.find((c) => c.id === courseId);
+
+  if (!course) {
+    res.status(404).json({
+      ok: false,
+      message: `course with id: "${courseId}" not found`,
+      data: null,
+      error: {
+        message: `course with id: "${courseId}" not found`,
+      },
+    });
+    return;
+  }
+
+  courses = courses.filter((c) => c.id !== courseId);
+
+  res.json({
+    ok: true,
+    message: "success",
+    data: {
+      id: course.id,
+    },
+    error: null,
+  });
+});
 export const courseRouter = router;
