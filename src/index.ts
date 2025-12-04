@@ -6,6 +6,9 @@ import { courseRouter } from "./features/course/course.route";
 const app: Application = express();
 const PORT = 3000;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Success connect to" });
 });

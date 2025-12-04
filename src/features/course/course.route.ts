@@ -1,9 +1,10 @@
 import { Request, Response, Router, Router as RouterType } from "express";
+import { createCourseSchema } from "./course.schema";
 
 interface Course {
   id: string;
   title: string;
-  description?: string;
+  description?: string | undefined;
 }
 
 const courses: Course[] = [
@@ -41,6 +42,28 @@ router.get("/", (req: Request, res: Response) => {
     ok: true,
     message: "Success",
     data: courses,
+    error: null,
+  });
+});
+
+router.post("/", async (req: Request, res: Response) => {
+  const body = req.body;
+
+  //validate and sanitize
+  const data = await createCourseSchema.parseAsync(body);
+
+  // create course
+  const newCourse: Course = {
+    id: Date.now().toString(),
+    title: data.title,
+    description: data.description,
+  };
+  courses.push(newCourse);
+
+  res.json({
+    ok: true,
+    message: "Success",
+    data: newCourse,
     error: null,
   });
 });
