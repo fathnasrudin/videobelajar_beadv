@@ -1,13 +1,11 @@
 import { Request, Response, Router, Router as RouterType } from "express";
-import { createCourseSchema } from "./course.schema";
+import {
+  Course,
+  createCourseSchema,
+  updateCourseSchema,
+} from "./course.schema";
 
-interface Course {
-  id: string;
-  title: string;
-  description?: string | undefined;
-}
-
-const courses: Course[] = [
+let courses: Course[] = [
   {
     id: "c1",
     title: "Dasar Pemrograman JavaScript",
@@ -55,8 +53,7 @@ router.post("/", async (req: Request, res: Response) => {
   // create course
   const newCourse: Course = {
     id: Date.now().toString(),
-    title: data.title,
-    description: data.description,
+    ...data,
   };
   courses.push(newCourse);
 
@@ -64,6 +61,47 @@ router.post("/", async (req: Request, res: Response) => {
     ok: true,
     message: "Success",
     data: newCourse,
+    error: null,
+  });
+});
+
+router.patch("/:id", async (req: Request, res: Response) => {
+  const body = req.body;
+  const courseId = req.params.id;
+
+  //validate and sanitize
+  const data = await updateCourseSchema.parseAsync(body);
+
+  const course = courses.find((c) => c.id === courseId);
+
+  if (!course) {
+    res.status(404).json({
+      ok: false,
+      message: `course with id: "${courseId}" not found`,
+      data: null,
+      error: {
+        message: `course with id: "${courseId}" not found`,
+      },
+    });
+    return;
+  }
+
+  const updatedCourse: Course = {
+    ...course,
+    description: data.description,
+    title: data.title ? data.title : course.title,
+  };
+  courses = courses.map((c) => {
+    if (c.id === courseId) {
+      c = updatedCourse;
+    }
+    return c;
+  });
+
+  res.json({
+    ok: true,
+    message: "Success",
+    data: updatedCourse,
     error: null,
   });
 });
