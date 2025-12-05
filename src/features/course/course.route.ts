@@ -59,12 +59,12 @@ router.patch("/:id", async (req: Request, res: Response) => {
   //validate and sanitize
   const data = await updateCourseSchema.parseAsync(body);
 
-  const updatedCourse: Course = courseService.updateCourseById(courseId, data);
+  const status = await courseService.updateCourseById(courseId, data);
 
   res.json({
     ok: true,
     message: "Success",
-    data: updatedCourse,
+    data: status,
     error: null,
   });
 });

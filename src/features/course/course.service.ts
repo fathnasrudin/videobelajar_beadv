@@ -65,29 +65,26 @@ export async function getCourseById(id: Course["id"]): Promise<Course> {
   return course;
 }
 
-export function updateCourseById(
+export async function updateCourseById(
   id: Course["id"],
   data: UpdateCourseInputSchema
-): Course {
-  const course = courses.find((c) => c.id === id);
+) {
+  const fields: string[] = [];
+  const values = [];
 
-  if (!course) {
-    throw new Error(`Course with id: "${id}" not found`);
-  }
-
-  const updatedCourse: Course = {
-    ...course,
-    description: data.description,
-    title: data.title ? data.title : course.title,
-  };
-
-  courses = courses.map((c) => {
-    if (c.id === id) {
-      c = updatedCourse;
-    }
-    return c;
+  Object.entries(data).forEach(([key, value]) => {
+    fields.push(`${key} = ?`);
+    values.push(value);
   });
-  return updatedCourse;
+
+  if (fields.length === 0) return Promise.resolve();
+
+  values.push(id);
+  const [rows] = await db.execute(
+    `UPDATE courses SET ${fields.join(",")}  WHERE id = ?`,
+    values
+  );
+  return rows;
 }
 
 export function deleteCourseById(id: Course["id"]) {
