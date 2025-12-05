@@ -51,7 +51,20 @@ export async function createCourse(data: CreateCourseInputSchema) {
 
 export async function getCourseById(id: Course["id"]): Promise<Course> {
   const [[course]] = await db.execute<CourseDB[]>(
-    "SELECT * from courses where id = ?",
+    `SELECT 
+     c.id, c.title, c.description, 
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'id', cat.id, 
+          'name', cat.name
+          )
+      ) as categories 
+    FROM courses c
+    LEFT JOIN courses_categories cc on cc.course_id = c.id
+    LEFT JOIN categories cat ON cat.id = cc.category_id
+    WHERE c.id = ? 
+    GROUP BY c.id;
+    `,
     [id]
   );
 
