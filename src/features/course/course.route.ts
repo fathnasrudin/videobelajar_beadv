@@ -8,8 +8,8 @@ import * as courseService from "./course.service";
 
 const router: RouterType = Router();
 
-router.get("/", (req: Request, res: Response) => {
-  const courses = courseService.getCourses();
+router.get("/", async (req: Request, res: Response) => {
+  const courses = await courseService.getCourses();
   res.json({
     ok: true,
     message: "Success",
@@ -40,7 +40,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 
   if (!courseId) throw new Error("Id not provided");
 
-  const course = courseService.getCourseById(courseId);
+  const course = await courseService.getCourseById(courseId);
 
   res.json({
     ok: true,

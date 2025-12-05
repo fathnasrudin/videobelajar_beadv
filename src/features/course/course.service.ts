@@ -1,3 +1,5 @@
+import { RowDataPacket } from "mysql2";
+import { db } from "../../lib/db";
 import {
   Course,
   CreateCourseInputSchema,
@@ -32,8 +34,11 @@ let courses: Course[] = [
   },
 ];
 
-export function getCourses(): Course[] {
-  return courses;
+interface CourseDB extends Course, RowDataPacket {}
+
+export async function getCourses(): Promise<Course[]> {
+  const [rows] = await db.query<CourseDB[]>("SELECT * from courses");
+  return rows;
 }
 
 export function createCourse(data: CreateCourseInputSchema): Course {
@@ -45,8 +50,11 @@ export function createCourse(data: CreateCourseInputSchema): Course {
   return newCourse;
 }
 
-export function getCourseById(id: Course["id"]): Course {
-  const course = courses.find((c) => c.id === id);
+export async function getCourseById(id: Course["id"]): Promise<Course> {
+  const [[course]] = await db.execute<CourseDB[]>(
+    "SELECT * from courses where id = ?",
+    [id]
+  );
 
   // @todo should fetch categories for the course
   // const thisCourseCategories =
