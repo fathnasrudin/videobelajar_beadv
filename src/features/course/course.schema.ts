@@ -2,9 +2,9 @@ import z from "zod";
 import { categorySchema } from "../category/category.schema";
 
 export const courseSchema = z.object({
-  id: z.uuidv7(),
+  id: z.string().min(1),
   title: z.string().min(1),
-  description: z.string().optional(),
+  description: z.string().nullable(),
   category: z.array(categorySchema).optional(),
 });
 
