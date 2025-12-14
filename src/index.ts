@@ -1,6 +1,7 @@
 import express, { Request } from "express";
 import { Application } from "express";
 import { Response } from "express";
+import cookieParser from "cookie-parser";
 import { courseRouter } from "./features/course/course.route";
 import { categoryRouter } from "./features/category/category.route";
 import "dotenv/config";
@@ -11,6 +12,7 @@ const PORT = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Success connect to" });
