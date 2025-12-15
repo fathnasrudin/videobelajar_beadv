@@ -10,18 +10,29 @@ datasource db {
 model RefreshToken {
   id         String    @unique @default(cuid())
   userId     String
-  secretHash String
+  secretHash String    @unique
   createdAt  DateTime  @default(now())
   expiresAt  DateTime
   revokedAt  DateTime?
 }
 
+model EmailVerificationToken {
+  id        String    @unique @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  usedAt    DateTime?
+}
+
 model User {
-  id       String @unique @default(cuid())
-  username String @unique
-  fullname String
-  email    String @unique
-  password String
+  id         String    @unique @default(cuid())
+  username   String    @unique
+  fullname   String
+  email      String    @unique
+  password   String
+  isVerified Boolean   @default(false)
+  verifiedAt DateTime?
 }
 
 model categories {
