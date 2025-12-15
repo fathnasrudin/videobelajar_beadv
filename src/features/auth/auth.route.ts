@@ -62,6 +62,22 @@ router.get("/refresh", async (req: Request, res: Response) => {
     .json({ message: "Success", data: { accessToken: newAccessToken } });
 });
 
+router.get("/refresh/logout", async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  await authService.logout(refreshToken);
+
+  // reset refreshToken to the cookie
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    path: "/api/auth/refresh",
+  });
+
+  res.status(204).json({ message: "Success" });
+});
+
 router.get(
   "/protected",
   authMiddleware.verify,

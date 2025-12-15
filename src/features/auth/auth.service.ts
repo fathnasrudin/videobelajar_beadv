@@ -66,8 +66,17 @@ export async function refresh(
   return { refreshToken: newRefreshToken, accessToken };
 }
 
+export async function logout(refreshToken: string): Promise<void> {
+  const [tokenId, secret] = refreshToken.split(".");
+
+  if (!tokenId) throw new Error("Refresh Token Not Provided");
+  if (!secret) throw new Error("Invalid Refresh Token Format");
+
+  await refreshTokenRepo.revokeRefreshTokenById(tokenId);
+}
 export default {
   register,
   login,
+  logout,
   refresh,
 };
