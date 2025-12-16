@@ -11,7 +11,7 @@ async function sendVerificationEmail({
   verificationLink: string;
 }) {
   return resend.emails.send({
-    from: "Acme <onboarding@resend.dev>",
+    from: config.emailVerification.sender,
     to: [user.email],
     subject: "Verifikasi Email Kamu",
     html: `

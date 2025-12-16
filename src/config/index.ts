@@ -9,6 +9,7 @@ export const config = {
     url: {
       full: `${process.env.BASE_URL as string}/api/email-verification/verify`,
     },
+    sender: process.env.EMAIL_VERIFICATION_SENDER as string,
   },
   resend: {
     apiKey: process.env.RESEND_API_KEY as string,
