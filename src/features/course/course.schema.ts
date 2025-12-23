@@ -30,11 +30,13 @@ export const courseSchema = z.object({
   title: z.string().min(1),
   description: z.string().nullable(),
   category: z.array(categorySchema).optional(),
+  price: z.coerce.number(),
 });
 
 export const createCourseSchema = courseSchema.pick({
   title: true,
   description: true,
+  price: true,
 });
 
 export const updateCourseSchema = createCourseSchema.partial();
