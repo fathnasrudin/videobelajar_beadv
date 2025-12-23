@@ -54,10 +54,7 @@ export async function createCourse(data: CreateCourseInputSchema) {
   // );
   // return rows;
   return prisma.courses.create({
-    data: {
-      title: data.title,
-      description: data.description,
-    },
+    data,
   });
 }
 
