@@ -7,6 +7,22 @@ export const courseQueryParamsSchema = z.object({
     .string()
     .transform((v) => v.split(",").filter(Boolean))
     .optional(),
+  sort: z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (!value) return [];
+
+      return value.split(",").map((item) => {
+        const desc = item.startsWith("-");
+        const field = desc ? item.slice(1) : item;
+
+        return {
+          field: z.enum(["description", "title"]).parse(field),
+          direction: desc ? "desc" : "asc",
+        };
+      });
+    }),
 });
 
 export const courseSchema = z.object({

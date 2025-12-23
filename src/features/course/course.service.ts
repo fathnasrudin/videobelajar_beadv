@@ -35,8 +35,13 @@ export async function getCourses(
     });
   }
 
+  const orderBy = queryParams.sort.map((s) => ({
+    [s.field]: s.direction,
+  }));
+
   let courses = await prisma.courses.findMany({
     where: { AND: and },
+    orderBy,
   });
 
   return courses;
