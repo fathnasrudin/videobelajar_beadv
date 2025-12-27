@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Signed Upload Cloudinary</title>
+  </head>
+  <body>
+    <h2>Upload Image (Signed)</h2>
+
+    <input type="file" id="fileInput" accept="image/*" />
+    <button id="uploadBtn">Upload</button>
+
+    <pre id="result"></pre>
+
+    <script>
+      const CLOUD_NAME = "YOUR_CLOUD_NAME";
+
+      document.getElementById("uploadBtn").onclick = async () => {
+        const file = document.getElementById("fileInput").files[0];
+        if (!file) {
+          alert("Pilih file dulu");
+          return;
+        }
+
+        const sigRes = {
+          signature: "a033f5ce3e32f3898ee38d96304669d22981c26c",
+          timestamp: 1766840840,
+          public_id: "courses/123/thumbnail",
+          overwrite: true,
+          api_key: "741146624115734",
+          cloud_name: "dgde0locp",
+          uploadEndpoint:
+            "https://api.cloudinary.com/v1_1/dgde0locp/image/upload",
+        };
+
+        /**
+         * 2️⃣ Kirim ke Cloudinary
+         */
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("api_key", sigRes.api_key);
+        formData.append("signature", sigRes.signature);
+
+        formData.append("timestamp", sigRes.timestamp);
+        formData.append("public_id", sigRes.public_id);
+        formData.append("overwrite", sigRes.overwrite);
+
+        const uploadRes = await fetch(sigRes.uploadEndpoint, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await uploadRes.json();
+        console.log({ resData: data });
+        document.getElementById("result").textContent = JSON.stringify(
+          data,
+          null,
+          2
+        );
+      };
+    </script>
+  </body>
+</html>

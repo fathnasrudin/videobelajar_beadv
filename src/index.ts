@@ -9,6 +9,7 @@ import { authRouter } from "./features/auth/auth.route";
 import { emailVerificationRouter } from "./features/email-verification/email-verification.route";
 import { config } from "./config";
 import { errorMiddleware } from "./lib/error/error.middleware";
+import { uploadRouter } from "./features/upload/upload.route";
 
 const app: Application = express();
 const PORT = 3000;
@@ -25,7 +26,14 @@ app.use("/api/courses", courseRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/email-verification", emailVerificationRouter);
+app.use("/api/upload", uploadRouter);
 
+app.post("/api/webhooks/cloudinary", express.json(), (req, res) => {
+  console.log("headers:", req.headers);
+  console.log("body:", req.body);
+
+  res.status(200).send("ok");
+});
 // error handler
 app.use(errorMiddleware);
 
