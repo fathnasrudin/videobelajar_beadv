@@ -47,6 +47,8 @@ model courses {
   description        String?              @db.Text
   courses_categories courses_categories[]
   price              Int
+  thumbnailId        String?
+  thumbnail          Asset?               @relation(fields: [thumbnailId], references: [id])
 }
 
 model courses_categories {
@@ -57,4 +59,32 @@ model courses_categories {
 
   @@id([course_id, category_id])
   @@index([category_id], map: "category_id")
+}
+
+model Asset {
+  id          String       @id @default(cuid())
+  publicId    String
+  assetOwners AssetOwner[]
+  courses     courses[]
+
+  @@index([publicId])
+}
+
+model AssetOwner {
+  id        String    @id @default(cuid())
+  assetId   String
+  asset     Asset     @relation(fields: [assetId], references: [id])
+  ownerId   String
+  ownerType OwnerType
+  role      AssetRole
+
+  @@index([ownerType, role, ownerId])
+}
+
+enum OwnerType {
+  COURSE
+}
+
+enum AssetRole {
+  THUMBNAIL
 }
