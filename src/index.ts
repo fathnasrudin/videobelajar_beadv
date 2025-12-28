@@ -11,10 +11,8 @@ import { emailVerificationRouter } from "./features/email-verification/email-ver
 import { config } from "./config";
 import { errorMiddleware } from "./lib/error/error.middleware";
 import { uploadRouter } from "./features/upload/upload.route";
-import { uploadService } from "./features/upload/upload.service";
 
 const app: Application = express();
-const PORT = 3000;
 app.use(
   cors({
     origin: "http://127.0.0.1:5500", //@TODO make the origin right with proper config
