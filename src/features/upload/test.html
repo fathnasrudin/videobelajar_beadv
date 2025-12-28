@@ -22,41 +22,74 @@
           return;
         }
 
-        const sigRes = {
-          signature: "a033f5ce3e32f3898ee38d96304669d22981c26c",
-          timestamp: 1766840840,
-          public_id: "courses/123/thumbnail",
-          overwrite: true,
-          api_key: "741146624115734",
-          cloud_name: "dgde0locp",
-          uploadEndpoint:
-            "https://api.cloudinary.com/v1_1/dgde0locp/image/upload",
-        };
+        const sigRes = await fetch(
+          "http://localhost:3000/api/upload/signature",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              ownerId: "cmjichipj0004rwuuqpiqdbtx",
+              ownerType: "COURSE",
+              assetRole: "THUMBNAIL",
+            }),
+          }
+        );
+        if (!sigRes.ok) {
+          throw new Error(sigRes.message);
+        }
+
+        const { data: sigData } = await sigRes.json();
+
+        console.log({ sigData });
 
         /**
          * 2️⃣ Kirim ke Cloudinary
          */
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("api_key", sigRes.api_key);
-        formData.append("signature", sigRes.signature);
+        formData.append("api_key", sigData.api_key);
+        formData.append("signature", sigData.signature);
 
-        formData.append("timestamp", sigRes.timestamp);
-        formData.append("public_id", sigRes.public_id);
-        formData.append("overwrite", sigRes.overwrite);
+        formData.append("timestamp", sigData.timestamp);
+        formData.append("public_id", sigData.public_id);
+        formData.append("overwrite", sigData.overwrite);
 
-        const uploadRes = await fetch(sigRes.uploadEndpoint, {
+        const uploadResRaw = await fetch(sigData.uploadEndpoint, {
           method: "POST",
           body: formData,
         });
 
-        const data = await uploadRes.json();
-        console.log({ resData: data });
+        const uploadResData = await uploadResRaw.json();
+        console.log({ uploadResData });
+
         document.getElementById("result").textContent = JSON.stringify(
-          data,
+          uploadResData,
           null,
           2
         );
+
+        //
+        const saveRes = await fetch("http://localhost:3000/api/upload/save", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ownerId: "cmjichipj0004rwuuqpiqdbtx",
+            ownerType: "COURSE",
+            assetRole: "THUMBNAIL",
+            publicId: uploadResData.public_id,
+          }),
+        });
+        if (!saveRes.ok) {
+          throw new Error(saveRes.message);
+        }
+
+        const { data: saveData } = await saveRes.json();
+
+        console.log({ saveData });
       };
     </script>
   </body>

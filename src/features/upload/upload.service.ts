@@ -1,27 +1,30 @@
 import cloudinary from "../../lib/cloudinary";
 import { config } from "../../config";
+import { prisma } from "../../lib/prisma";
+import { assetRepo } from "./asset.repo";
 
-type UploadTarget = {
-  owner: "course";
-  asset: "thumbnail";
+export type UploadTarget = {
+  ownerId: string;
+  ownerType: "COURSE";
+  assetRole: "THUMBNAIL";
 };
 
 const uploadPolicies = {
-  course: {
-    thumbnail: {
+  COURSE: {
+    THUMBNAIL: {
       overwrite: true,
       buildPublicId: (ownerId: string) => `courses/${ownerId}/thumbnail`,
     },
   },
 };
 
-const generate = (target: UploadTarget, ownerId: string) => {
-  const policy = uploadPolicies[target.owner]?.[target.asset];
+const generate = (target: UploadTarget) => {
+  const policy = uploadPolicies[target.ownerType]?.[target.assetRole];
   if (!policy) throw new Error("Invalid Upload Target");
 
   const payload = {
     timestamp: Math.floor(Date.now() / 1000),
-    public_id: policy.buildPublicId(ownerId),
+    public_id: policy.buildPublicId(target.ownerId),
     overwrite: true,
   };
 
@@ -33,6 +36,7 @@ const generate = (target: UploadTarget, ownerId: string) => {
   return {
     signature,
     ...payload,
+    ...target,
 
     api_key: config.cloudinary.apiKey,
     cloud_name: config.cloudinary.cloudName,
@@ -42,6 +46,62 @@ const generate = (target: UploadTarget, ownerId: string) => {
   };
 };
 
+const upsertAsset = async (
+  target: { ownerType: "COURSE"; role: "THUMBNAIL"; ownerId: string },
+  metadata: { public_id: string }
+) => {
+  const asset = await prisma.asset.findFirst({
+    where: { publicId: metadata.public_id },
+  });
+
+  if (!asset) {
+    const createdAsset = await prisma.asset.create({
+      data: {
+        publicId: metadata.public_id,
+      },
+    });
+
+    if (target.ownerType === "COURSE" && target.role === "THUMBNAIL") {
+      // add id directly to the course
+      await prisma.courses.update({
+        where: { id: target.ownerId },
+        data: {
+          thumbnailId: createdAsset.id,
+        },
+      });
+    } else {
+      // or to junction table as fallback
+      await prisma.assetOwner.create({
+        data: {
+          ...target,
+          asset: {
+            connect: {
+              id: createdAsset.id,
+            },
+          },
+        },
+      });
+    }
+  }
+
+  if (asset) {
+    // update asset metadata
+    // not yet implemented
+    console.warn("Update asset not yet implemented");
+  }
+};
+
+const getAssets = async ({ assetRole, ownerId, ownerType }: UploadTarget) => {
+  const assets = await assetRepo.findAssetsByOwner({
+    ownerId,
+    ownerType,
+    role: assetRole,
+  });
+  return assets;
+};
+
 export const uploadService = {
   generate,
+  upsertAsset,
+  getAssets,
 };
