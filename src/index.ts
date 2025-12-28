@@ -17,7 +17,7 @@ const app: Application = express();
 const PORT = 3000;
 app.use(
   cors({
-    origin: "http://127.0.0.1:5500",
+    origin: "http://127.0.0.1:5500", //@TODO make the origin right with proper config
     methods: ["GET", "POST"],
     credentials: true, // untuk kirim cookie
   })
