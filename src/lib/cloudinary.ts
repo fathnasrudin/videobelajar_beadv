@@ -8,3 +8,7 @@ cloudinary.config({
 });
 
 export default cloudinary;
+
+export function buildCloudinaryUrl({ publicId }: { publicId: string }) {
+  return `https://res.cloudinary.com/${config.cloudinary.cloudName}/image/upload/${publicId}`;
+}
