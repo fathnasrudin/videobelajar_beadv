@@ -6,30 +6,52 @@ async function main() {
   // USERS
   // ======================
   const passwordHash = await bcrypt.hash("password123", 10);
+  const admin = {
+    username: "admin",
+    fullname: "Admin User",
+    email: "admin@example.com",
+    password: passwordHash,
+    isVerified: true,
+    verifiedAt: new Date(),
+  };
 
-  const user = await prisma.user.create({
-    data: {
-      username: "admin",
-      fullname: "Admin User",
-      email: "admin@example.com",
-      password: passwordHash,
-      isVerified: true,
-      verifiedAt: new Date(),
-    },
+  const user = await prisma.user.upsert({
+    where: { email: admin.email },
+    create: admin,
+    update: {},
   });
 
   // ======================
   // CATEGORIES
   // ======================
-  const categories = await prisma.categories.createMany({
-    data: [{ name: "Programming" }, { name: "Finance" }, { name: "Design" }],
-  });
+  const categoriesData = [
+    { name: "Programming" },
+    { name: "Finance" },
+    { name: "Design" },
+  ];
+
+  await Promise.all(
+    categoriesData.map((cat) =>
+      prisma.categories.upsert({
+        where: { name: cat.name },
+        create: cat,
+        update: {},
+      })
+    )
+  );
 
   const allCategories = await prisma.categories.findMany();
 
   // ======================
   // COURSES
   // ======================
+  const courses = await prisma.courses.findMany();
+
+  if (courses.length) {
+    console.log("course table not empty. seed courses skipped");
+    return;
+  }
+
   const course1 = await prisma.courses.create({
     data: {
       title: "Fullstack JavaScript",

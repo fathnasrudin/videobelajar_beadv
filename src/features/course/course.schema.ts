@@ -32,7 +32,9 @@ export const courseSchema = z.object({
   title: z.string().min(1),
   description: z.string().nullable(),
   category: z.array(categorySchema).optional(),
+  categories: z.array(categorySchema).optional(),
   price: z.coerce.number(),
+  thumbnailUrl: z.string().nullable(),
 });
 
 export const createCourseSchema = courseSchema.pick({
